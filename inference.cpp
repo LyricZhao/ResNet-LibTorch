@@ -1,6 +1,7 @@
-#include "model.hpp"
+#include "rnlt/model.hpp"
 
 #include <iostream>
+#include <torch/torch.h>
 
 int main() {
     torch::Device device("cpu");
@@ -8,7 +9,7 @@ int main() {
         device = torch::Device("cuda:0");
 
     auto t = torch::rand({4, 3, 224, 224}).to(device);
-    auto net = ResNet50();
+    auto net = rnlt::ResNet50();
     net.to(device);
 
     t = net.forward(t);
