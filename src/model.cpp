@@ -96,6 +96,7 @@ torch::nn::Sequential ResNet<Block>::make_layer(int64_t c, int64_t n, int64_t s)
 template <typename Block>
 torch::Tensor ResNet<Block>::forward(const torch::Tensor& x) {
     auto out = torch::relu(bn1(conv1(x)));
+    // Reduce the feature maps by 32x
     out = layer1->forward(out);
     out = layer2->forward(out);
     out = layer3->forward(out);

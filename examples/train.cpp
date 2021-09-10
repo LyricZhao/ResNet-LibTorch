@@ -9,12 +9,55 @@ int main(int argc, char** argv) {
     // Parse arguments
     po::options_description desc("Train CIFAR-10 with ResNet");
     desc.add_options()
-        ("path", po::value<std::string>()->required(), "CIFAR-10 path");
+        ("path", po::value<std::string>()->required(), "CIFAR-10 path")
+        ("lr", po::value<double>()->default_value(0.1), "Learning rate")
+        ("epochs", po::value<int>()->default_value(200), "Number of epochs")
+        ("batch_size", po::value<int>()->default_value(8), "Batch size")
+        ("workers", po::value<int>()->default_value(4), "Number of workers to process data");
     po::variables_map args;
     po::store(po::parse_command_line(argc, argv, desc), args);
     po::notify(args);
 
     // Read dataset
-    rnlt::CIFAR10 dataset(args["path"].as<std::string>());
+    std::cout << "Reading dataset ... " << std::flush;
+    auto dataset = rnlt::CIFAR10(args["path"].as<std::string>())
+        .map(torch::data::transforms::Normalize<>({0.4914, 0.4822, 0.4465},
+                                                  {0.2023, 0.1994, 0.2010}))
+        .map(torch::data::transforms::Stack<>());
+    auto data_loader = torch::data::make_data_loader(
+            std::move(dataset), torch::data::DataLoaderOptions()
+            .batch_size(args["batch_size"].as<int>())
+            .workers(args["workers"].as<int>())
+            .enforce_ordering(true));
+    std::cout << "OK!" << std::endl;
+
+    // Load model and device
+    std::cout << "Loading model ... " << std::flush;
+    auto model = rnlt::ResNet18();
+    auto device = torch::Device("cpu");
+    if (torch::cuda::is_available())
+        device = torch::Device("cuda:0");
+    model.to(device);
+    std::cout << "OK!" << std::endl;
+
+    // Train model
+    std::cout << "Begin training ..." << std::endl;
+    torch::optim::SGD optimizer(model.parameters(),
+                                torch::optim::SGDOptions(args["lr"].as<double>())
+                                    .momentum(0.9)
+                                    .weight_decay(1e-4));
+    torch::nn::CrossEntropyLoss criterion;
+    for (int i = 1, n = args["epochs"].as<int>(); i <= n; ++ i) {
+        for (auto& batch: *data_loader) {
+            auto images = batch.data.to(device);
+            auto labels = batch.target.to(device);
+            optimizer.zero_grad();
+            auto out = model.forward(images);
+            auto loss = criterion(out, labels);
+            std::cout << " > Loss: " << loss.item<float>() << std::endl;
+            loss.backward();
+            optimizer.step();
+        }
+    }
     return 0;
 }

@@ -6,7 +6,7 @@ namespace rnlt {
 
 static constexpr int kNumSamplePerFile = 10000;
 static constexpr int kImageHeight = 32;
-static constexpr int kImageWidth = 10000;
+static constexpr int kImageWidth = 32;
 static constexpr int kImageChannels = 3;
 
 const std::vector<std::string> train_file_names = {"data_batch_1.bin", "data_batch_2.bin",
@@ -40,9 +40,9 @@ CIFAR10::CIFAR10(const std::string& path, bool train) {
         }
     }
     images = torch::cat(images_collection);
-    images.to(torch::kFloat32).div_(255.0);
+    images = images.to(torch::kFloat32).div_(255.0);
     labels = torch::cat(labels_collection);
-    labels.to(torch::kInt64);
+    labels = labels.to(torch::kInt64);
 }
 
 torch::data::Example<> CIFAR10::get(size_t index) {
