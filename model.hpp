@@ -32,19 +32,19 @@ struct BasicBlock: torch::nn::Module {
         register_module("bn1", bn1);
         register_module("conv2", conv2);
         register_module("bn2", bn2);
-        if (s != 1 or ic != c * expansion) {
+        if (s != 1 or ic != c * expansion)
             shortcut = torch::nn::Sequential(
                 torch::nn::Conv2d(conv_options(ic, c * expansion, 1, s)),
                 torch::nn::BatchNorm2d(c * expansion)
             );
-            register_module("shortcut", shortcut);
-        }
+        else
+            shortcut = torch::nn::Sequential(torch::nn::Identity());
+        register_module("shortcut", shortcut);
     }
 
     torch::Tensor forward(torch::Tensor x) {
         auto out = torch::relu(bn1(conv1(x)));
         out = bn2(conv2(out));
-        // TODO: May check whether empty shortcut works
         out += shortcut->forward(x);
         out = torch::relu(out);
         return out;
@@ -76,20 +76,20 @@ struct Bottleneck: torch::nn::Module {
         register_module("bn2", bn2);
         register_module("conv3", conv3);
         register_module("bn3", bn3);
-        if (s != 1 or ic != c * expansion) {
+        if (s != 1 or ic != c * expansion)
             shortcut = torch::nn::Sequential(
                     torch::nn::Conv2d(conv_options(ic, c * expansion, 1, s)),
                     torch::nn::BatchNorm2d(c * expansion)
             );
-            register_module("shortcut", shortcut);
-        }
+        else
+            shortcut = torch::nn::Sequential(torch::nn::Identity());
+        register_module("shortcut", shortcut);
     }
 
     torch::Tensor forward(torch::Tensor x) {
         auto out = torch::relu(bn1(conv1(x)));
         out = bn2(conv2(out));
         out = bn3(conv3(out));
-        // TODO: May check whether empty shortcut works
         out += shortcut->forward(x);
         out = torch::relu(out);
         return out;
@@ -146,12 +146,12 @@ struct ResNet: torch::nn::Module {
     }
 };
 
-static ResNet<BasicBlock> ResNet18(){ return ResNet<BasicBlock>(2, 2, 2, 2); }
+static ResNet<BasicBlock> ResNet18(){ return {2, 2, 2, 2}; }
 
-static ResNet<BasicBlock> ResNet34(){ return ResNet<BasicBlock>(3, 4, 6, 3); }
+static ResNet<BasicBlock> ResNet34(){ return {3, 4, 6, 3}; }
 
-static ResNet<Bottleneck> ResNet50(){ return ResNet<Bottleneck>(3, 4, 6, 3); }
+static ResNet<Bottleneck> ResNet50(){ return {3, 4, 6, 3}; }
 
-static ResNet<Bottleneck> ResNet101(){ return ResNet<Bottleneck>(3, 4, 23, 2); }
+static ResNet<Bottleneck> ResNet101(){ return {3, 4, 23, 2}; }
 
-static ResNet<Bottleneck> ResNet152(){ return ResNet<Bottleneck>(3, 8, 36, 3); }
+static ResNet<Bottleneck> ResNet152(){ return {3, 8, 36, 3}; }

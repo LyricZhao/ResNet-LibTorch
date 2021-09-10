@@ -7,5 +7,8 @@ set(CMAKE_CXX_STANDARD 14)
 find_package(Torch REQUIRED)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
-add_executable(ResNet-LibTorch main.cpp)
-target_link_libraries(ResNet-LibTorch "${TORCH_LIBRARIES}")
+add_executable(inference inference.cpp)
+target_link_libraries(inference "${TORCH_LIBRARIES}")
+
+add_executable(train train.cpp)
+target_link_libraries(train "${TORCH_LIBRARIES}")
