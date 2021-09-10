@@ -22,7 +22,7 @@ BasicBlock::BasicBlock(int64_t ic, int64_t c, int64_t s):
     register_module("shortcut", shortcut);
 }
 
-torch::Tensor BasicBlock::forward(torch::Tensor x) {
+torch::Tensor BasicBlock::forward(const torch::Tensor& x) {
     auto out = torch::relu(bn1(conv1(x)));
     out = bn2(conv2(out));
     out += shortcut->forward(x);
@@ -54,7 +54,7 @@ Bottleneck::Bottleneck(int64_t ic, int64_t c, int64_t s):
     register_module("shortcut", shortcut);
 }
 
-torch::Tensor Bottleneck::forward(torch::Tensor x) {
+torch::Tensor Bottleneck::forward(const torch::Tensor& x) {
     auto out = torch::relu(bn1(conv1(x)));
     out = bn2(conv2(out));
     out = bn3(conv3(out));

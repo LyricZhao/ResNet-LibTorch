@@ -24,7 +24,7 @@ struct BasicBlock: torch::nn::Module {
 
     BasicBlock(int64_t ic, int64_t c, int64_t s=1);
 
-    torch::Tensor forward(torch::Tensor x);
+    torch::Tensor forward(const torch::Tensor& x);
 };
 
 /// Bottleneck block of ResNet structure
@@ -40,7 +40,7 @@ struct Bottleneck: torch::nn::Module {
 
     Bottleneck(int64_t ic, int64_t c, int64_t s=1);
 
-    torch::Tensor forward(torch::Tensor x);
+    torch::Tensor forward(const torch::Tensor& x);
 };
 
 template <typename Block>
