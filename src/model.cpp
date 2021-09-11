@@ -85,10 +85,7 @@ ResNet<Block>::ResNet(int64_t b1, int64_t b2, int64_t b3, int64_t b4, int64_t nu
     for (auto &module: modules(false)) {
         if (module->name() == "torch::nn::Conv2dImpl") {
             for (auto &p: module->named_parameters(false))
-                torch::nn::init::xavier_normal_(p.value());
-        } else if (module->name() == "torch::nn::BatchNorm2dImpl") {
-            for (auto &p: module->named_parameters(false))
-                torch::nn::init::constant_(p.value(), p.key() == "weight");
+                torch::nn::init::xavier_uniform_(p.value());
         }
     }
 }
